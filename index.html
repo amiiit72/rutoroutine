@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoutineFlow | Dark Liquid Glass Routine Tracker</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%25237C3AED' stroke-width='2'%3E%3Cpath d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <!-- Morphing Oil-on-Water Background Blob Filters -->
+    <div class="liquid-bg">
+      <div class="blob blob-purple"></div>
+      <div class="blob blob-cyan"></div>
+      <div class="blob blob-pink"></div>
+      <div class="blob blob-blue"></div>
+    </div>
+
+    <!-- SVG Turbulence Noise Displacement Map -->
+    <svg class="liquid-filter-svg" style="position: absolute; width: 0; height: 0; pointer-events: none;">
+      <defs>
+        <filter id="liquid-glass-filter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- Main Application Container -->
+    <div id="app" class="app-container">
+      
+      <!-- Left Sidebar Navigation -->
+      <aside class="sidebar glass-panel">
+        <div class="sidebar-header">
+          <div class="logo">
+            <span class="logo-icon">
+              <i data-lucide="droplet"></i>
+            </span>
+            <span class="logo-text">RoutineFlow</span>
+          </div>
+          <button class="sidebar-close-btn" id="sidebar-close-btn">
+            <i data-lucide="chevron-left"></i>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="#" class="nav-link active" data-tab="dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-tab="tasks">
+                <i data-lucide="check-square"></i>
+                <span>Task Board</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-tab="timetable">
+                <i data-lucide="calendar"></i>
+                <span>Schedule Grid</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-tab="timer">
+                <i data-lucide="timer"></i>
+                <span>Focus Hub</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-tab="friendCircle">
+                <i data-lucide="users"></i>
+                <span>Friend Circle</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-tab="friendGroups">
+                <i data-lucide="messages-square"></i>
+                <span>Groups Hub</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="student-profile">
+            <div class="avatar">
+              <span class="avatar-letters">RF</span>
+            </div>
+            <div class="profile-info">
+              <p class="profile-name">Scholar Orbit</p>
+              <p class="profile-role">Level 4 Focus Agent</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Workspace -->
+      <main class="main-content">
+        
+        <!-- Top Bar -->
+        <header class="topbar glass-panel">
+          <div class="topbar-left">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle-btn">
+              <i data-lucide="menu"></i>
+            </button>
+            <div class="greetings">
+              <h1 id="greeting-title">Keep burning the midnight oil</h1>
+              <p class="subtitle" id="current-date-display">Wednesday, June 17, 2026</p>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <!-- XP indicator -->
+            <div class="focus-badge">
+              <i data-lucide="zap" style="color: var(--accent-cyan); width: 14px; height: 14px;"></i>
+              <span id="header-xp-val" style="margin-right: 4px;">450</span><span>XP</span>
+            </div>
+            <div class="focus-badge">
+              <span class="indicator-dot pulse"></span>
+              <span class="focus-badge-text" id="header-focus-status">Ready to Flow</span>
+            </div>
+            <!-- Quick Clock -->
+            <div class="quick-clock glass-panel">
+              <i data-lucide="clock"></i>
+              <span id="digital-clock">03:00 AM</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dynamic Content Window -->
+        <section class="workspace-viewport">
+          
+          <!-- TAB: DASHBOARD -->
+          <div class="tab-pane active" id="tab-dashboard">
+            <div class="dashboard-grid">
+              
+              <!-- Greeting / Streak card -->
+              <div class="dash-hero glass-panel grid-span-2">
+                <div class="hero-content">
+                  <h2>Enter Your Focus Flow.</h2>
+                  <p>Welcome back! You completed <span class="highlight-text" id="dash-done-count">0</span> tasks today and tracked <span class="highlight-text" id="dash-focus-count">0m</span> of deep study. Maintain your rhythm!</p>
+                  <div class="hero-actions">
+                    <button class="btn btn-primary" onclick="window.switchTab('timer')">
+                      <i data-lucide="play"></i> Focus Hub
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.switchTab('tasks')">
+                      <i data-lucide="list"></i> Manage Tasks
+                    </button>
+                  </div>
+                </div>
+                <div class="hero-visual">
+                  <div class="glass-sphere"></div>
+                </div>
+              </div>
+
+              <!-- Streak Card with fire animation -->
+              <div class="glass-panel streak-card">
+                <div class="streak-flame-container">
+                  <div class="streak-flame"></div>
+                  <div class="streak-flame-particles"></div>
+                </div>
+                <h3 class="highlight-text" style="font-size: 1.4rem; font-weight: 800;" id="dash-streak-count">5 Days</h3>
+                <p class="stat-label">Daily Focus Streak</p>
+              </div>
+
+              <!-- XP Status Widget -->
+              <div class="glass-panel stat-card">
+                <div class="card-icon"><i data-lucide="star" style="color: var(--accent-violet);"></i></div>
+                <div class="stat-info" style="width: calc(100% - 70px);">
+                  <h3>Routine Level</h3>
+                  <div class="stat-number" id="dash-level-number">Lvl 4</div>
+                  <div class="gpa-progress-bar">
+                    <div class="gpa-progress-fill" id="dash-xp-progress" style="width: 45%;"></div>
+                  </div>
+                  <p class="stat-label" style="margin-top: 4px;" id="dash-xp-desc">450 / 1000 XP to next badge</p>
+                </div>
+              </div>
+
+              <!-- Today's schedule -->
+              <div class="glass-panel schedule-preview grid-span-2">
+                <div class="panel-header">
+                  <h3><i data-lucide="book-open"></i> Timetable for Today</h3>
+                  <button class="btn-text" onclick="window.switchTab('timetable')">Grid View</button>
+                </div>
+                <div class="schedule-preview-list" id="dash-schedule-today">
+                  <!-- Dynamic -->
+                </div>
+              </div>
+
+              <!-- Today's priority tasks -->
+              <div class="glass-panel task-preview grid-span-2">
+                <div class="panel-header">
+                  <h3><i data-lucide="check-circle2"></i> Urgent Todo list</h3>
+                  <button class="btn-text" onclick="window.switchTab('tasks')">Full Board</button>
+                </div>
+                <div class="task-preview-list" id="dash-tasks-today">
+                  <!-- Dynamic -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- TAB: TASK BOARD -->
+          <div class="tab-pane" id="tab-tasks">
+            <div class="task-manager-layout">
+              <!-- Task Creator glass sidebar -->
+              <div class="task-creator-panel glass-panel">
+                <h3>Create New Task</h3>
+                <form id="task-form">
+                  <div class="form-group">
+                    <label for="task-title">Task Name</label>
+                    <input type="text" id="task-title" required placeholder="E.g., Read biology chapter 5" class="form-control" />
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col">
+                      <label for="task-category">Category</label>
+                      <select id="task-category" class="form-control">
+                        <option value="Study">📚 Study</option>
+                        <option value="Assignment">📝 Assignment</option>
+                        <option value="Project">💻 Project</option>
+                        <option value="Exam">🎯 Exam</option>
+                        <option value="Personal">🏡 Personal</option>
+                        <option value="Other">🌟 Other</option>
+                      </select>
+                    </div>
+                    <div class="form-group col">
+                      <label for="task-priority">Priority</label>
+                      <select id="task-priority" class="form-control">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Normal</option>
+                        <option value="High">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="task-due-date">Due Date</label>
+                    <input type="date" id="task-due-date" class="form-control" />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i data-lucide="plus"></i> Add Task
+                  </button>
+                </form>
+              </div>
+
+              <!-- Tasks list panel -->
+              <div class="task-list-panel glass-panel">
+                <div class="list-filters-bar">
+                  <div class="search-box glass-panel">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="task-search" placeholder="Search tasks..." />
+                  </div>
+                  <div class="filter-badges">
+                    <button class="filter-badge active" data-filter="all">All</button>
+                    <button class="filter-badge" data-filter="pending">Pending</button>
+                    <button class="filter-badge" data-filter="high">Urgent</button>
+                    <button class="filter-badge" data-filter="completed">Completed</button>
+                  </div>
+                </div>
+
+                <div class="tasks-container" id="tasks-list">
+                  <!-- Dynamic Tasks -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: WEEKLY TIMETABLE & GOOGLE CALENDAR -->
+          <div class="tab-pane" id="tab-timetable">
+            <div class="timetable-container glass-panel">
+              <div class="timetable-header-row">
+                <div class="header-info">
+                  <h2>Weekly Schedule Planner</h2>
+                  <p>Organize classes, labs, and study times. Google Calendar events are synchronized.</p>
+                </div>
+                <div class="gcal-sync-status">
+                  <div class="gcal-indicator" id="gcal-status-pill">
+                    <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                    <span>Not Connected</span>
+                  </div>
+                  <button class="btn gcal-btn btn-sm" id="gcal-sync-btn">
+                    <i data-lucide="refresh-cw"></i> Sync Calendar
+                  </button>
+                  <button class="btn btn-primary" id="open-event-modal-btn">
+                    <i data-lucide="plus"></i> Add Event
+                  </button>
+                </div>
+              </div>
+
+              <div class="timetable-wrapper" style="position: relative;">
+                <!-- Mock sync loading state overlay -->
+                <div class="sync-loader-overlay" id="gcal-sync-loader" style="display: none;">
+                  <i data-lucide="calendar" class="pulse" style="width: 44px; height: 44px; color: var(--accent-cyan);"></i>
+                  <p style="margin-top: 12px; font-weight: 700;">Syncing Google Calendar Events...</p>
+                  <div class="liquid-fill-bar">
+                    <div class="liquid-fill-progress"></div>
+                  </div>
+                </div>
+
+                <div class="timetable-grid">
+                  <!-- Hours column -->
+                  <div class="time-col">
+                    <div class="grid-cell corner-cell">Time</div>
+                    <div class="grid-cell time-cell">08:00 AM</div>
+                    <div class="grid-cell time-cell">09:00 AM</div>
+                    <div class="grid-cell time-cell">10:00 AM</div>
+                    <div class="grid-cell time-cell">11:00 AM</div>
+                    <div class="grid-cell time-cell">12:00 PM</div>
+                    <div class="grid-cell time-cell">01:00 PM</div>
+                    <div class="grid-cell time-cell">02:00 PM</div>
+                    <div class="grid-cell time-cell">03:00 PM</div>
+                    <div class="grid-cell time-cell">04:00 PM</div>
+                    <div class="grid-cell time-cell">05:00 PM</div>
+                    <div class="grid-cell time-cell">06:00 PM</div>
+                    <div class="grid-cell time-cell">07:00 PM</div>
+                    <div class="grid-cell time-cell">08:00 PM</div>
+                  </div>
+
+                  <!-- Days of Week columns -->
+                  <div class="day-col" data-day="1">
+                    <div class="grid-cell day-header">Monday</div>
+                    <div class="day-events-container" id="day-events-1"></div>
+                  </div>
+                  <div class="day-col" data-day="2">
+                    <div class="grid-cell day-header">Tuesday</div>
+                    <div class="day-events-container" id="day-events-2"></div>
+                  </div>
+                  <div class="day-col" data-day="3">
+                    <div class="grid-cell day-header">Wednesday</div>
+                    <div class="day-events-container" id="day-events-3"></div>
+                  </div>
+                  <div class="day-col" data-day="4">
+                    <div class="grid-cell day-header">Thursday</div>
+                    <div class="day-events-container" id="day-events-4"></div>
+                  </div>
+                  <div class="day-col" data-day="5">
+                    <div class="grid-cell day-header">Friday</div>
+                    <div class="day-events-container" id="day-events-5"></div>
+                  </div>
+                  <div class="day-col" data-day="6">
+                    <div class="grid-cell day-header">Saturday</div>
+                    <div class="day-events-container" id="day-events-6"></div>
+                  </div>
+                  <div class="day-col" data-day="0">
+                    <div class="grid-cell day-header">Sunday</div>
+                    <div class="day-events-container" id="day-events-0"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: FOCUS HUB (STOPWATCH / POMODORO) -->
+          <div class="tab-pane" id="tab-timer">
+            <div class="timer-layout">
+              <!-- Focus Controls -->
+              <div class="focus-controls-card glass-panel">
+                <div class="timer-mode-selector">
+                  <button class="timer-mode-btn active" id="mode-pomodoro">Pomodoro Mode</button>
+                  <button class="timer-mode-btn" id="mode-stopwatch">Stopwatch Mode</button>
+                </div>
+
+                <!-- Circular visual ring -->
+                <div class="timer-ring-wrapper">
+                  <svg class="timer-svg" viewBox="0 0 220 220">
+                    <circle class="timer-ring-bg" cx="110" cy="110" r="95"></circle>
+                    <circle class="timer-ring-progress" id="timer-progress-ring" cx="110" cy="110" r="95"></circle>
+                  </svg>
+                  <div class="timer-text-overlay">
+                    <span class="timer-countdown" id="timer-display">25:00</span>
+                    <span class="timer-label" id="timer-status-text">FOCUS</span>
+                  </div>
+                </div>
+
+                <!-- Action controls -->
+                <div class="timer-actions">
+                  <button class="btn btn-icon btn-secondary" id="timer-reset-btn" title="Reset">
+                    <i data-lucide="rotate-ccw"></i>
+                  </button>
+                  <button class="btn btn-play" id="timer-start-btn">
+                    <i data-lucide="play" id="timer-play-icon"></i>
+                  </button>
+                  <button class="btn btn-icon btn-secondary" id="timer-option-btn" title="Laps / Settings">
+                    <i data-lucide="flag" id="timer-option-icon"></i>
+                  </button>
+                </div>
+
+                <!-- Settings Pomodoro -->
+                <div class="pomodoro-settings-inline" id="pomodoro-settings">
+                  <div class="setting-item">
+                    <label>Work</label>
+                    <input type="number" id="pomo-work-input" min="1" max="120" value="25" />
+                    <span>min</span>
+                  </div>
+                  <div class="setting-item">
+                    <label>Break</label>
+                    <input type="number" id="pomo-break-input" min="1" max="60" value="5" />
+                    <span>min</span>
+                  </div>
+                </div>
+
+                <!-- Rewards trophies shell -->
+                <h3 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-top: 24px;">Trophy Cabinet</h3>
+                <div class="milestones-shelf">
+                  <div class="badge-trophy unlocked" data-tooltip="Scholar: Complete first Pomodoro" id="badge-pomo">🏆</div>
+                  <div class="badge-trophy" data-tooltip="Endurance: Run stopwatch for 1 hour" id="badge-stopwatch">⏱️</div>
+                  <div class="badge-trophy" data-tooltip="Perfectionist: 5 days Focus Streak" id="badge-streak">🔥</div>
+                  <div class="badge-trophy" data-tooltip="Overachiever: Reach 1000 Focus XP" id="badge-xp">🎖️</div>
+                </div>
+              </div>
+
+              <!-- Focus Analytics & Logs -->
+              <div class="timer-logs-panel glass-panel">
+                <div class="timer-logs-split">
+                  <!-- ChartJS Analytics -->
+                  <div class="timer-chart-container glass-panel" style="padding: 16px;">
+                    <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px;">Focus Time Logs</h3>
+                    <canvas id="timer-history-chart"></canvas>
+                  </div>
+                  <!-- Log lists -->
+                  <div>
+                    <div class="panel-header">
+                      <h3 id="timer-log-title">Study History Logs</h3>
+                      <button class="btn-text" id="clear-timer-logs">Clear</button>
+                    </div>
+                    <div class="timer-log-list" id="timer-logs-container">
+                      <!-- Dynamic -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: FRIEND CIRCLE (SOCIAL FEED) -->
+          <div class="tab-pane" id="tab-friendCircle">
+            <div class="friend-circle-layout">
+              <!-- Posts feed -->
+              <div class="circle-feed-panel glass-panel">
+                <div class="circle-feed-header">
+                  <h2>BeReal Routine Posts</h2>
+                  <button class="btn btn-primary btn-sm" id="post-daily-stats-btn">
+                    <i data-lucide="share-2"></i> Post My Stats Today
+                  </button>
+                </div>
+                <div class="circle-feed-container" id="friend-feed-list">
+                  <!-- Dynamic cards -->
+                </div>
+              </div>
+
+              <!-- Sliding Comment Section -->
+              <div class="comments-side-panel glass-panel">
+                <div class="comments-panel-header">
+                  <h3 id="comments-box-title">Thread Comments</h3>
+                  <span class="save-status" id="comments-count">0 comments</span>
+                </div>
+                <div class="comments-list" id="comments-list-box">
+                  <!-- Dynamic comments -->
+                  <div class="empty-state">
+                    <p>Select comments on a post to read reviews.</p>
+                  </div>
+                </div>
+                <div class="comment-input-bar">
+                  <input type="text" id="comment-text-input" placeholder="Add comment..." class="form-control" />
+                  <button class="btn btn-primary btn-sm" id="comment-send-btn">
+                    <i data-lucide="send"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: FRIEND GROUPS & COLLABORATION -->
+          <div class="tab-pane" id="tab-friendGroups">
+            <div class="friend-groups-layout">
+              <!-- Sidebar list -->
+              <div class="groups-sidebar glass-panel">
+                <h3>My Focus Groups</h3>
+                <div class="groups-list" id="groups-list-container">
+                  <!-- Dynamic list of groups -->
+                </div>
+              </div>
+
+              <!-- Active Chat room -->
+              <div class="chat-hub-workspace">
+                <div class="chat-room-container glass-panel">
+                  <div class="chat-room-header">
+                    <div class="chat-room-info">
+                      <h3 id="chat-active-group-name">Alpha Team Space</h3>
+                      <p id="chat-active-group-status">4 members online</p>
+                    </div>
+                    <button class="btn video-deck-btn btn-sm" id="toggle-video-call-btn">
+                      <i data-lucide="video"></i> Group Call
+                    </button>
+                  </div>
+
+                  <div class="chat-messages-log" id="chat-messages-box">
+                    <!-- Dynamic chat bubbling -->
+                  </div>
+
+                  <div class="chat-input-bar">
+                    <input type="text" id="chat-message-input" placeholder="Type group message..." class="form-control" />
+                    <button class="btn btn-primary" id="chat-send-btn">
+                      <i data-lucide="send"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Shared Todo Board -->
+                <div class="shared-board-panel glass-panel">
+                  <div class="shared-board-header">
+                    <h4>Shared Board</h4>
+                    <button class="btn-text" id="add-shared-task-btn">Add Shared</button>
+                  </div>
+                  <div class="shared-board-list" id="shared-todo-box">
+                    <!-- Dynamic shared items -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </main>
+    </div>
+
+    <!-- MODAL: ADD TIMETABLE EVENT -->
+    <div class="modal-backdrop" id="timetable-modal">
+      <div class="modal-card glass-panel">
+        <div class="modal-header">
+          <h3>Schedule Course Event</h3>
+          <button class="modal-close" id="close-event-modal-btn">&times;</button>
+        </div>
+        <form id="timetable-form">
+          <input type="hidden" id="event-edit-id" />
+          <div class="form-group">
+            <label for="event-title">Course Code / Subject Name</label>
+            <input type="text" id="event-title" required placeholder="E.g., CS-301 Advanced Algorithms" class="form-control" />
+          </div>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="event-day">Day of Week</label>
+              <select id="event-day" class="form-control">
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="0">Sunday</option>
+              </select>
+            </div>
+            <div class="form-group col">
+              <label for="event-color">Theme Color</label>
+              <select id="event-color" class="form-control">
+                <option value="violet">Violet</option>
+                <option value="cyan">Cyan</option>
+                <option value="emerald">Emerald</option>
+                <option value="amber">Amber</option>
+                <option value="rose">Rose</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="event-room">Location / Virtual Meeting Link</label>
+            <input type="text" id="event-room" placeholder="E.g., Room 402B or zoom.com/meet" class="form-control" />
+          </div>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="event-start">Start Time</label>
+              <select id="event-start" class="form-control">
+                <option value="08:00">08:00 AM</option>
+                <option value="09:00">09:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">01:00 PM</option>
+                <option value="14:00">02:00 PM</option>
+                <option value="15:00">03:00 PM</option>
+                <option value="16:00">04:00 PM</option>
+                <option value="17:00">05:00 PM</option>
+                <option value="18:00">06:00 PM</option>
+                <option value="19:00">07:00 PM</option>
+              </select>
+            </div>
+            <div class="form-group col">
+              <label for="event-end">End Time</label>
+              <select id="event-end" class="form-control">
+                <option value="09:00">09:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">01:00 PM</option>
+                <option value="14:00">02:00 PM</option>
+                <option value="15:00">03:00 PM</option>
+                <option value="16:00">04:00 PM</option>
+                <option value="17:00">05:00 PM</option>
+                <option value="18:00">06:00 PM</option>
+                <option value="19:00">07:00 PM</option>
+                <option value="20:00">08:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="timetable-delete-btn" style="display: none;">Delete</button>
+            <button type="submit" class="btn btn-primary">Save Event</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- DRAGGABLE FLOATING VIDEO CALL PANEL MOCKUP -->
+    <div class="floating-video-call-deck glass-panel" id="floating-webrtc-call-panel">
+      <div class="video-deck-header" id="video-deck-drag-handle">
+        <h4><span class="indicator-dot active-study pulse" style="margin-right: 4px;"></span> Group Call: WebRTC</h4>
+        <button class="video-deck-close" id="close-video-call-btn">&times;</button>
+      </div>
+      <div class="video-grid-mini">
+        <div class="video-tile speaking">
+          <div class="video-avatar-placeholder">ME</div>
+          <span class="video-tile-name">Me (Speaking)</span>
+        </div>
+        <div class="video-tile">
+          <div class="video-avatar-placeholder" style="background: linear-gradient(135deg, #10b981, #06b6d4);">JD</div>
+          <span class="video-tile-name">John Doe</span>
+        </div>
+        <div class="video-tile">
+          <div class="video-avatar-placeholder" style="background: linear-gradient(135deg, #f59e0b, #ec4899);">AM</div>
+          <span class="video-tile-name">Alex Miller</span>
+        </div>
+        <div class="video-tile">
+          <div class="video-avatar-placeholder" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">SS</div>
+          <span class="video-tile-name">Sarah Smith</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert sound for countdown timers -->
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-500.wav" preload="auto"></audio>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
