@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RoutineFlow | Dark Liquid Glass Routine Tracker</title>
-    <!-- Google Fonts -->
+    <!-- Google Fonts — Variable axis for smooth weight morphing -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%25237C3AED' stroke-width='2'%3E%3Cpath d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E" />
@@ -21,12 +21,18 @@
       <div class="blob blob-blue"></div>
     </div>
 
-    <!-- SVG Turbulence Noise Displacement Map -->
+    <!-- SVG Filters: Turbulence Displacement + Film Grain Noise -->
     <svg class="liquid-filter-svg" style="position: absolute; width: 0; height: 0; pointer-events: none;">
       <defs>
         <filter id="liquid-glass-filter">
           <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" result="noise" />
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <!-- Film grain noise for glass panels -->
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" in="noise" result="mono" />
+          <feBlend in="SourceGraphic" in2="mono" mode="multiply" />
         </filter>
       </defs>
     </svg>
@@ -49,6 +55,8 @@
         </div>
 
         <nav class="sidebar-nav">
+          <!-- Glowing liquid blob indicator — animated by JS -->
+          <div class="nav-blob-indicator" id="nav-blob"></div>
           <ul>
             <li>
               <a href="#" class="nav-link active" data-tab="dashboard">

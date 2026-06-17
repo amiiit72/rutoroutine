@@ -229,7 +229,7 @@ function openCommentThread(postId) {
     const row = document.createElement('div');
     row.className = 'comment-row';
     row.innerHTML = `
-      <div class="comment-avatar">${comment.user.substring(0,2).toUpperCase()}</div>
+      <div class="comment-avatar">${comment.user.substring(0, 2).toUpperCase()}</div>
       <div class="comment-text-box">
         <div class="comment-user">${escapeHtml(comment.user)}</div>
         <p>${escapeHtml(comment.text)}</p>
@@ -257,11 +257,11 @@ function sendComment() {
     });
     savePosts();
     input.value = '';
-    
+
     // Refresh feed count & comment thread panel
     renderFeed();
     openCommentThread(activePostId);
-    
+
     // Earn XP reward
     window.incrementXp?.(10);
   }
@@ -310,5 +310,5 @@ function escapeHtml(text) {
     '"': '&quot;',
     "'": '&#039;'
   };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }

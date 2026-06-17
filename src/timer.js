@@ -1,9 +1,14 @@
 // Upgraded Focus Hub (Timer, Rewards, Streaks & Chart.js) for RoutineFlow
-import Chart from 'chart.js/auto';
+// Chart.js loaded lazily on first Focus Hub visit
+let Chart = null;
 
 let mode = 'pomodoro'; 
 let timerInterval = null;
 let isRunning = false;
+
+// Web Worker for accurate Pomodoro timing (immune to main thread jank)
+let timerWorker = null;
+let chartLoaded = false;
 
 // Pomodoro Phase & Time
 let pomoPhase = 'focus';
@@ -32,7 +37,45 @@ export function initTimer() {
   switchMode('pomodoro');
   updateProgressRing(1);
   initXpSystem();
-  renderFocusChart();
+  initTimerWorker();
+  // Chart.js is lazy-loaded on first Focus Hub visit
+}
+
+function initTimerWorker() {
+  try {
+    timerWorker = new Worker(
+      new URL('./timerWorker.js', import.meta.url),
+      { type: 'module' }
+    );
+    timerWorker.onmessage = (e) => {
+      const { type, remaining } = e.data;
+      if (type === 'tick') {
+        pomoSecondsLeft = remaining;
+        updateTimerDisplay();
+        const percent = pomoSecondsLeft / pomoTotalDuration;
+        updateProgressRing(percent);
+      } else if (type === 'complete') {
+        playAlertSound();
+        handlePomoCompletion();
+      }
+    };
+  } catch (err) {
+    console.warn('Web Worker not available, falling back to setInterval', err);
+    timerWorker = null;
+  }
+}
+
+// Lazy-load Chart.js and render focus chart
+export async function lazyLoadChart() {
+  if (chartLoaded) return;
+  chartLoaded = true;
+  try {
+    const module = await import('chart.js/auto');
+    Chart = module.default;
+    renderFocusChart();
+  } catch (err) {
+    console.warn('Chart.js failed to load:', err);
+  }
 }
 
 function loadTimerState() {
@@ -186,18 +229,22 @@ function startTimer() {
   }
 
   if (mode === 'pomodoro') {
-    timerInterval = setInterval(() => {
-      pomoSecondsLeft--;
-      updateTimerDisplay();
-      
-      const percent = pomoSecondsLeft / pomoTotalDuration;
-      updateProgressRing(percent);
-
-      if (pomoSecondsLeft <= 0) {
-        playAlertSound();
-        handlePomoCompletion();
-      }
-    }, 1000);
+    // Use Web Worker for accurate, jank-free timing
+    if (timerWorker) {
+      timerWorker.postMessage({ type: 'start', seconds: pomoSecondsLeft });
+    } else {
+      // Fallback to setInterval if worker unavailable
+      timerInterval = setInterval(() => {
+        pomoSecondsLeft--;
+        updateTimerDisplay();
+        const percent = pomoSecondsLeft / pomoTotalDuration;
+        updateProgressRing(percent);
+        if (pomoSecondsLeft <= 0) {
+          playAlertSound();
+          handlePomoCompletion();
+        }
+      }, 1000);
+    }
   } else {
     swStartTime = Date.now() - swElapsedTime;
     timerInterval = setInterval(() => {
@@ -211,6 +258,11 @@ function pauseTimer() {
   isRunning = false;
   updatePlayButtonIcon(false);
   clearInterval(timerInterval);
+
+  // Pause Web Worker too
+  if (mode === 'pomodoro' && timerWorker) {
+    timerWorker.postMessage({ type: 'pause' });
+  }
 
   const headerStatus = document.getElementById('header-focus-status');
   const headerDot = document.querySelector('.indicator-dot');

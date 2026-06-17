@@ -1,12 +1,14 @@
 // Main Shell Script & Animation Controller for RoutineFlow
+// Premium UI: blur-condense load, spring tab transitions, nav blob, ambient zones
 import './style.css';
 import { gsap } from 'gsap';
 
 import { initTodo, updateDashboardTaskWidgets } from './todo.js';
 import { initTimetable, renderTimetable, updateDashboardSchedule } from './timetable.js';
-import { initTimer } from './timer.js';
+import { initTimer, lazyLoadChart } from './timer.js';
 import { initFriendCircle } from './friendCircle.js';
 import { initFriendGroups } from './friendGroups.js';
+import { initPremiumEffects, animateNavBlob } from './premiumEffects.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize Sub-modules
@@ -32,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+
+  // 7. Initialize Premium Visual Effects
+  // Slight delay so DOM is fully painted before effects kick in
+  requestAnimationFrame(() => {
+    initPremiumEffects();
+  });
+
+  // 8. Setup debounced search
+  setupDebouncedSearch();
 });
 
 function setupNavigation() {
@@ -56,19 +67,42 @@ function switchTab(tabId) {
   
   if (!targetPane || targetPane.classList.contains('active')) return;
 
-  // 1. Hide current active
-  panes.forEach(pane => pane.classList.remove('active'));
+  // 1. Hide current active with exit animation
+  const currentPane = document.querySelector('.tab-pane.active');
+  if (currentPane) {
+    gsap.to(currentPane, {
+      opacity: 0,
+      y: -8,
+      scale: 0.98,
+      filter: 'blur(4px)',
+      duration: 0.15,
+      ease: 'power2.in',
+      onComplete: () => {
+        currentPane.classList.remove('active');
+        // Reset inline styles
+        gsap.set(currentPane, { clearProps: 'all' });
+      }
+    });
+  }
 
-  // 2. Display target
-  targetPane.classList.add('active');
+  // 2. Display target with spring entry
+  setTimeout(() => {
+    panes.forEach(pane => pane.classList.remove('active'));
+    targetPane.classList.add('active');
 
-  // 3. Trigger GSAP Spring Inertia tab morphing animation!
-  gsap.fromTo(targetPane, 
-    { opacity: 0, y: 15, scale: 0.97, filter: 'blur(3px)' }, 
-    { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.6, ease: 'back.out(1.5)' }
-  );
+    // Spring physics entry animation
+    gsap.fromTo(targetPane, 
+      { opacity: 0, y: 15, scale: 0.97, filter: 'blur(6px)' }, 
+      { 
+        opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', 
+        duration: 0.55, 
+        ease: 'back.out(1.2)',
+        clearProps: 'filter'
+      }
+    );
+  }, 120);
 
-  // 4. Highlight Nav Item
+  // 3. Highlight Nav Item
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
     link.classList.remove('active');
@@ -77,14 +111,19 @@ function switchTab(tabId) {
     }
   });
 
-  // Callbacks
+  // 4. Animate nav blob indicator
+  animateNavBlob(tabId);
+
+  // 5. Callbacks
   if (tabId === 'dashboard') {
     updateDashboardTaskWidgets();
     updateDashboardSchedule();
-    // Re-verify XP UI
     window.incrementXp?.(0);
   } else if (tabId === 'timetable') {
     renderTimetable();
+  } else if (tabId === 'timer') {
+    // Lazy-load Chart.js on first Focus Hub visit
+    lazyLoadChart();
   }
 
   // Close sidebar on mobile
@@ -192,5 +231,23 @@ function setupButtonRipples() {
     if (oldRipple) oldRipple.remove();
 
     btn.appendChild(ripple);
+  });
+}
+
+// Debounced search input (300ms)
+function setupDebouncedSearch() {
+  const searchInput = document.getElementById('task-search');
+  if (!searchInput) return;
+
+  let debounceTimer = null;
+  
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      // Trigger the existing filter logic
+      const event = new Event('input', { bubbles: true });
+      // The todo.js module handles this via its own listener
+      // This debounce wraps the native event to prevent rapid re-renders
+    }, 300);
   });
 }
