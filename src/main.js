@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 8. Setup debounced search
   setupDebouncedSearch();
+
+  // 9. Setup Lo-Fi Music Player
+  setupLofiPlayer();
 });
 
 function setupNavigation() {
@@ -250,4 +253,84 @@ function setupDebouncedSearch() {
       // This debounce wraps the native event to prevent rapid re-renders
     }, 300);
   });
+}
+
+// Lo-Fi Player Controller (with automatic browser autoplay compatibility)
+function setupLofiPlayer() {
+  const audio = document.getElementById('lofi-audio');
+  const toggleBtn = document.getElementById('lofi-player-toggle');
+  const playIcon = document.getElementById('lofi-play-icon');
+  const trackDot = document.getElementById('lofi-track-dot');
+  const volumeSlider = document.getElementById('lofi-volume-slider');
+
+  if (!audio || !toggleBtn || !playIcon || !trackDot || !volumeSlider) return;
+
+  // Set initial default volume from slider
+  audio.volume = parseFloat(volumeSlider.value);
+
+  // Autoplay function: handles browser permission restriction cleanly
+  function attemptAutoplay() {
+    audio.play()
+      .catch(() => {
+        console.log("Lo-Fi autoplay blocked. Waiting for user interaction...");
+        const playOnInteraction = () => {
+          audio.play()
+            .then(() => {
+              removeInteractionListeners();
+            })
+            .catch(err => console.log("Play failed on interaction:", err));
+        };
+
+        // Bind interaction triggers
+        document.addEventListener('click', playOnInteraction);
+        document.addEventListener('keydown', playOnInteraction);
+        document.addEventListener('touchstart', playOnInteraction);
+
+        function removeInteractionListeners() {
+          document.removeEventListener('click', playOnInteraction);
+          document.removeEventListener('keydown', playOnInteraction);
+          document.removeEventListener('touchstart', playOnInteraction);
+        }
+      });
+  }
+
+  // Bind UI updates directly to native audio events
+  audio.addEventListener('play', () => updateUI(true));
+  audio.addEventListener('playing', () => updateUI(true));
+  audio.addEventListener('pause', () => updateUI(false));
+  audio.addEventListener('ended', () => updateUI(false));
+  audio.addEventListener('error', () => updateUI(false));
+
+  // Attempt to play music immediately
+  attemptAutoplay();
+
+  // Play/Pause button click
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Avoid triggering document interaction listener
+    if (audio.paused) {
+      audio.play().catch(err => console.error(err));
+    } else {
+      audio.pause();
+    }
+  });
+
+  // Dynamic volume adjustment
+  volumeSlider.addEventListener('input', (e) => {
+    audio.volume = parseFloat(e.target.value);
+  });
+
+  function updateUI(isPlaying) {
+    if (isPlaying) {
+      playIcon.setAttribute('data-lucide', 'pause');
+      trackDot.classList.add('playing');
+    } else {
+      playIcon.setAttribute('data-lucide', 'play');
+      trackDot.classList.remove('playing');
+    }
+
+    // Refresh Lucide icon graphics
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
 }
